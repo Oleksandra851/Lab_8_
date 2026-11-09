@@ -1,0 +1,157 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title> Викладачі університету (ASP.NET Web API + TypeScript)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light shadow-sm mb-4"
+             style="background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 50%, #e0e7ff 100%); border-bottom: 2px solid #93c5fd;">
+            <div class="container-fluid">
+                <span class="navbar-brand fw-bold text-primary fs-4 ms-2">
+                    🌐 Lab_8 | Web API + TypeScript
+                </span>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container flex-grow-1 pb-4">
+
+        <div class="d-grid mb-3">
+            <button id="btnAddTeacher" class="btn btn-primary shadow-sm fw-bold py-2 fs-5">+ Додати нового викладача</button>
+        </div>
+
+        <div class="table-responsive shadow-sm rounded-3 mb-5">
+            <table class="table table-hover align-middle mb-0 bg-white">
+                <thead>
+                    <tr>
+                        <th style="background-color: #dbeafe; color: #1e3a8a; padding: 14px; width: 30%;">ПІБ Викладача</th>
+                        <th style="background-color: #dbeafe; color: #1e3a8a; padding: 14px; width: 15%;">Посада</th>
+                        <th style="background-color: #dbeafe; color: #1e3a8a; padding: 14px; width: 30%;">Предмети (Години)</th>
+                        <th style="background-color: #dbeafe; color: #1e3a8a; padding: 14px; width: 25%;" class="text-center">Дії</th>
+                    </tr>
+                </thead>
+                <tbody id="teachersList">
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div class="modal fade" id="teacherModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="modalTitle">Викладач</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="teacherForm">
+                        <input type="hidden" id="teacherId" value="0" />
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Прізвище*</label>
+                                <input type="text" id="lastName" class="form-control" required />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Ім'я*</label>
+                                <input type="text" id="firstName" class="form-control" required />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">По батькові</label>
+                                <input type="text" id="middleName" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Телефон</label>
+                                <input type="text" id="phone" class="form-control" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Місце роботи</label>
+                                <input type="text" id="workplace" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Посада*</label>
+                            <select id="positionId" class="form-select" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Домашня адреса</label>
+                            <input type="text" id="homeAddress" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Характеристика</label>
+                            <textarea id="characteristic" class="form-control" rows="2"></textarea>
+                        </div>
+                        <hr class="my-4" />
+                        <h5 class="fw-bold text-primary mb-3">Призначення дисциплін (множинний вибір)</h5>
+                        <div class="table-responsive mb-3">
+                            <table class="table table-bordered align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 60px;" class="text-center">Обрати</th>
+                                        <th>Предмет</th>
+                                        <th style="width: 180px;">Прочитані години</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="subjectsTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                    <button type="button" id="btnSaveTeacher" class="btn btn-primary fw-semibold">Зберегти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title fw-bold">Детальна інформація про викладача</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <dl class="row fs-6">
+                        <dt class="col-sm-3">ПІБ Викладача:</dt>
+                        <dd class="col-sm-9 fw-semibold text-primary" id="detFullName"></dd>
+                        <dt class="col-sm-3">Телефон:</dt>
+                        <dd class="col-sm-9" id="detPhone"></dd>
+                        <dt class="col-sm-3">Місце роботи:</dt>
+                        <dd class="col-sm-9" id="detWorkplace"></dd>
+                        <dt class="col-sm-3">Посада:</dt>
+                        <dd class="col-sm-9" id="detPosition"></dd>
+                        <dt class="col-sm-3">Домашня адреса:</dt>
+                        <dd class="col-sm-9" id="detAddress"></dd>
+                        <dt class="col-sm-3">Характеристика:</dt>
+                        <dd class="col-sm-9" id="detCharacteristic"></dd>
+                        <dt class="col-sm-3">Предмети (Години):</dt>
+                        <dd class="col-sm-9" id="detSubjects"></dd>
+                    </dl>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрити</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="border-top text-muted py-3 bg-white shadow-sm mt-auto text-center">
+        <div class="container">
+            &copy; 2026 - Lab_8 (ASP.NET Core Web API + TypeScript) - Чернівецький національний університет
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
